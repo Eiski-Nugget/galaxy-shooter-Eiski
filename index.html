@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Galaxy Shooter - Eiski</title>
+<style>
+body{margin:0;background:#000;overflow:hidden;color:white;font-family:Arial;text-align:center}
+canvas{display:block;margin:0 auto;background:#050510;touch-action:none}
+#score{position:fixed;top:10px;left:10px;font-size:20px;font-weight:bold}
+#btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:15px 40px;font-size:20px;background:#ff0055;color:white;border:none;border-radius:30px}
+</style>
+</head>
+<body>
+<div id="score">⭐ Score: 0 | ❤️ 3</div>
+<canvas id="game" width="400" height="600"></canvas>
+<button id="btn">🚀 TIRER</button>
+<script>
+let c=document.getElementById("game"),x=c.getContext("2d");
+let px=180,py=500,bullets=[],enemies=[],score=0,lives=3;
+function draw(){
+x.fillStyle="#050510";x.fillRect(0,0,400,600);
+// etoiles
+x.fillStyle="white";for(let i=0;i<30;i++)x.fillRect(Math.random()*400,Math.random()*600,2,2);
+// joueur
+x.fillStyle="#00ffcc";x.beginPath();x.moveTo(px+20,py);x.lineTo(px,py+40);x.lineTo(px+40,py+40);x.closePath();x.fill();
+// balles
+x.fillStyle="yellow";bullets.forEach(b=>{b.y-=8;x.fillRect(b.x,b.y,5,12)});
+// ennemis
+x.fillStyle="#ff0055";enemies.forEach(e=>{e.y+=2;x.beginPath();x.arc(e.x,e.y,18,0,7);x.fill()});
+bullets=bullets.filter(b=>b.y>0);enemies=enemies.filter(e=>e.y<620);
+// collisions
+bullets.forEach((b,bi)=>{enemies.forEach((e,ei)=>{if(Math.abs(b.x-e.x)<20&&Math.abs(b.y-e.y)<20){enemies.splice(ei,1);bullets.splice(bi,1);score+=10}})});
+enemies.forEach((e,ei)=>{if(Math.abs(e.x-(px+20))<30&&Math.abs(e.y-py)<30){enemies.splice(ei,1);lives--}});
+document.getElementById("score").innerText="⭐ Score: "+score+" | ❤️ "+lives;
+if(lives<=0){alert("GAME OVER ! Score: "+score);location.reload()}
+requestAnimationFrame(draw);
+}
+setInterval(()=>{enemies.push({x:Math.random()*360+20,y:0})},800);
+c.addEventListener("touchmove",e=>{let r=c.getBoundingClientRect();px=e.touches[0].clientX-r.left-20;py=e.touches[0].clientY-r.top-20});
+c.addEventListener("mousemove",e=>{let r=c.getBoundingClientRect();px=e.clientX-r.left-20;py=e.clientY-r.top-20});
+document.getElementById("btn").addEventListener("click",()=>{bullets.push({x:px+18,y:py})});
+document.addEventListener("keydown",e=>{if(e.code=="Space")bullets.push({x:px+18,y:py})});
+draw();
+</script>
+</body>
+</html>
